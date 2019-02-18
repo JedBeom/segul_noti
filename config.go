@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 )
 
 type Config struct {
@@ -21,10 +20,10 @@ func init() {
 func loadConfig() {
 	file, err := ioutil.ReadFile("config.json")
 	if err != nil {
-		log.Println(err)
+		panic(err)
 	}
 	err = json.Unmarshal(file, &config)
 	if err != nil {
-		log.Println(err)
+		panic(err)
 	}
 }

@@ -1,36 +1,47 @@
 package main
 
 import (
-	"github.com/bwmarrin/discordgo"
+	"fmt"
 	"log"
+
+	"github.com/bwmarrin/discordgo"
+	"github.com/mmcdole/gofeed"
 )
 
-var (
-	old, _ = getPosts()
-)
+var old, _ = getItems()
 
-func checkNew() (newPosts []Post) {
-	posts, err := getPosts()
+func getItems() (items []*gofeed.Item, err error) {
+
+	p := gofeed.NewParser()
+	feed, err := p.ParseURL("http://wangun.ms.jne.kr/rssList.jsp?siteId=wangun_ms&boardId=775784")
 	if err != nil {
-		log.Println("Parsing:", err)
+		log.Println("Feed Parsing:", err)
 		return
 	}
 
-	if len(old) != len(posts) {
-		log.Println("length of old and posts' is different.")
-		old = posts
+	items = feed.Items
+	return
+
+}
+
+func checkNew() (posts []*gofeed.Item) {
+	items, err := getItems()
+	if err != nil {
 		return
 	}
 
-	for i, post := range posts {
-		if old[i].Title == post.Title {
+	for _, item := range items {
+		if old[0].Title == item.Title {
+
+			if len(posts) != 0 {
+				log.Println("Post finding break")
+			}
 			break
 		}
 
-		newPosts = append(newPosts, post)
-	}
+		posts = append(posts, item)
 
-	old = posts
+	}
 
 	return
 
@@ -47,6 +58,7 @@ var (
 func notification() {
 	posts := checkNew()
 	if len(posts) == 0 {
+		log.Println("No New Posts")
 		return
 	}
 
@@ -59,6 +71,7 @@ func notification() {
 
 	for _, request := range requests {
 
+		fmt.Println(request)
 		send := discordgo.MessageSend{
 			Content: "<@" + request.AuthorID + "> 쥬니올이 새 게시물을 가져왔어요!",
 			Embed:   &embed,

@@ -1,8 +1,9 @@
 package main
 
 import (
-	disgo "github.com/bwmarrin/discordgo"
 	"log"
+
+	disgo "github.com/bwmarrin/discordgo"
 )
 
 var (
@@ -31,7 +32,7 @@ func discordInit() {
 
 	log.Println("Bot Opened.")
 
-	err = dg.UpdateListeningStatus("~sub")
+	err = dg.UpdateListeningStatus("~sub or ~posts")
 	if err != nil {
 		log.Println("Update Listening Status:", err)
 	}
