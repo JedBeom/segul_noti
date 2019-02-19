@@ -43,6 +43,8 @@ func checkNew() (posts []*gofeed.Item) {
 
 	}
 
+	old = items
+
 	return
 
 }
@@ -64,6 +66,8 @@ func notification() {
 
 	var embed discordgo.MessageEmbed
 	embed.Author = &author
+	embed.Title = "순천왕운중학교 알림판 새 게시물"
+	embed.Color = 0xed90ba
 
 	for _, post := range posts {
 		addField(&embed.Fields, post.Title, "[바로가기]("+post.Link+")")
