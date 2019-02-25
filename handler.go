@@ -7,32 +7,55 @@ import (
 	disgo "github.com/bwmarrin/discordgo"
 )
 
-type Request struct {
-	ChannelID string
-	AuthorID  string
-}
-
-var (
-	requests []Request
-)
+var requests = make(map[string][]string)
 
 func handler(s *disgo.Session, m *disgo.MessageCreate) {
 	if m.Content == "~sub" {
 
-		requests = append(requests, Request{m.ChannelID, m.Author.ID})
-		reply(s, m, "알겠어요! 새 게시물이 있으면 쥬니올이 가져오게 할게요!")
+		if users, ok := requests[m.ChannelID]; ok {
+
+			for _, user := range users {
+				if user == m.Author.ID {
+					reply(s, m, "이미 오야붕에게 가져가게 되어있어! 그만 가져오게 하고 싶으면 `~unsub`라고 입력하면 돼!")
+					return
+				}
+			}
+
+			requests[m.ChannelID] = append(users, m.Author.ID)
+		} else {
+			requests[m.ChannelID] = []string{m.Author.ID}
+		}
+
+		reply(s, m, "알겠어, 오야붕! 새 게시물이 있으면 줄게!")
 		fmt.Println("Subs:", requests)
 
 	} else if m.Content == "~posts" {
 		printPosts(s, m)
+	} else if m.Content == "~unsub" {
+
+		if users, ok := requests[m.ChannelID]; ok {
+
+			for i, user := range users {
+				if user == m.Author.ID {
+
+					requests[m.ChannelID] = append(users[:i], users[i+1:]...)
+					reply(s, m, "오케이, 이제 그만 가져올게!")
+					return
+				}
+			}
+
+		}
+
+		reply(s, m, "원래 오야붕에게는 안 주는 걸... 받고 싶으면 `~sub`라고 말해봐.")
 	}
+
 }
 
 func printPosts(s *disgo.Session, m *disgo.MessageCreate) {
-	reply(s, m, "잠시만 기다려주세요!")
+	reply(s, m, "잠시만 기다려줘!")
 	posts, err := getItems()
 	if err != nil {
-		reply(s, m, "죄송해요. 쥬니올이 게시물들을 물어오지 못했어요.")
+		reply(s, m, "미안, 못 가져왔어!")
 		return
 	}
 
@@ -44,7 +67,7 @@ func printPosts(s *disgo.Session, m *disgo.MessageCreate) {
 	}
 
 	send := disgo.MessageSend{
-		Content: "<@" + m.Author.ID + "> 쥬니올이 새 게시물을 가져왔어요!",
+		Content: "<@" + m.Author.ID + "> 여기 지금 게시물!",
 		Embed:   &embed,
 	}
 

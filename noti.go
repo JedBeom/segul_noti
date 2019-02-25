@@ -52,8 +52,8 @@ func checkNew() (posts []*gofeed.Item) {
 var (
 	author = discordgo.MessageEmbedAuthor{
 		URL:     "https://github.com/JedBeom/segul_noti",
-		Name:    "하코자키 세리카",
-		IconURL: "https://raw.githubusercontent.com/JedBeom/choicebot_discord/master/serika.png",
+		Name:    "오오가미 타마키",
+		IconURL: "https://raw.githubusercontent.com/JedBeom/segul_noti/master/tamaki.png",
 	}
 )
 
@@ -73,14 +73,20 @@ func notification() {
 		addField(&embed.Fields, post.Title, "[바로가기]("+post.Link+")")
 	}
 
-	for _, request := range requests {
+	for channelID, users := range requests {
 
-		fmt.Println(request)
+		var mention string
+		for _, user := range users {
+			mention += "<@" + user + "> "
+		}
+
+		content := fmt.Sprintf("%s오야붕, 여기 새 게시물 %d개야!", mention, len(posts))
+
 		send := discordgo.MessageSend{
-			Content: "<@" + request.AuthorID + "> 쥬니올이 새 게시물을 가져왔어요!",
+			Content: content,
 			Embed:   &embed,
 		}
-		msg, err := dg.ChannelMessageSendComplex(request.ChannelID, &send)
+		msg, err := dg.ChannelMessageSendComplex(channelID, &send)
 		if err != nil {
 			log.Println("Error Replying\nMsg:", msg, "\nErr:", err)
 		}
