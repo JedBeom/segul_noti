@@ -26,7 +26,7 @@ func handler(s *disgo.Session, m *disgo.MessageCreate) {
 			requests[m.ChannelID] = []string{m.Author.ID}
 		}
 
-		reply(s, m, "알겠어, 오야붕! 새 게시물이 있으면 줄게!")
+		reply(s, m, "알겠어, 오야붕! 새 게시물이 있으면 줄게! 그만 받고 싶으면 `~unsub`라고 말해줘!")
 		fmt.Println("Subs:", requests)
 
 	} else if m.Content == "~posts" {
@@ -39,6 +39,11 @@ func handler(s *disgo.Session, m *disgo.MessageCreate) {
 				if user == m.Author.ID {
 
 					requests[m.ChannelID] = append(users[:i], users[i+1:]...)
+
+					if len(requests[m.ChannelID]) == 0 {
+						delete(requests, m.ChannelID)
+					}
+
 					reply(s, m, "오케이, 이제 그만 가져올게!")
 					return
 				}
